@@ -38,18 +38,18 @@ public class Evtol {
     }
 
     public String generateSerialNumber() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder SERIAL_NUMBER = new StringBuilder();
         int SERIAL_NUMBER_LENGTH = 10;
 
-        sb.append("EV-");
+        SERIAL_NUMBER.append("EV-");
         String numericChars = "0123456789";
 
         for (int i = 0; i < SERIAL_NUMBER_LENGTH; i++) {
             int index = (int) (Math.random() * numericChars.length());
-            sb.append(numericChars.charAt(index));
+            SERIAL_NUMBER.append(numericChars.charAt(index));
         }
 
-        return sb.toString();
+        return SERIAL_NUMBER.toString();
     }
 
     public String getSerialNumber() {

@@ -3,8 +3,12 @@ package com.example.transportation.transportation.controllers;
 import com.example.transportation.transportation.models.Evtol;
 import com.example.transportation.transportation.models.Medication;
 import com.example.transportation.transportation.services.EvtolService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/evtol")
@@ -36,11 +40,18 @@ public class EvtolController {
         return evtolService.getEvtolLoadedMedications(serialNumber);
     }
 
-    @PostMapping("/{serialNumber}/load")
+    @PostMapping(value = "/{serialNumber}/load", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Object> loadEvtolWithMedication(
             @PathVariable String serialNumber,
-            @RequestBody Medication medication
-    ) {
-        return evtolService.loadEvtolMedications(serialNumber, medication);
+            @RequestPart Medication medication,
+            @RequestPart MultipartFile multipartFile
+    ) throws IOException {
+        return evtolService.loadEvtolMedications(serialNumber, medication, multipartFile);
+    }
+
+    @GetMapping("/images/{imageName}")
+    @ResponseBody
+    public ResponseEntity<byte[]> getMedicationImage(@PathVariable String imageName) throws IOException {
+        return evtolService.getMedicationImage(imageName);
     }
 }
