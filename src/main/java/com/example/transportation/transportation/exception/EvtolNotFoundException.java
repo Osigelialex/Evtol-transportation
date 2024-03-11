@@ -7,8 +7,4 @@ public class EvtolNotFoundException extends RuntimeException {
     public EvtolNotFoundException(String message) {
         super(message);
     }
-
-    public EvtolNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

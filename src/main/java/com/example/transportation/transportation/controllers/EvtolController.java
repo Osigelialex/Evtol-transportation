@@ -1,14 +1,20 @@
 package com.example.transportation.transportation.controllers;
 
+import com.example.transportation.transportation.dto.BatteryDTO;
+import com.example.transportation.transportation.dto.EvtolDTO;
+import com.example.transportation.transportation.dto.MedicationDTO;
 import com.example.transportation.transportation.models.Evtol;
 import com.example.transportation.transportation.models.Medication;
 import com.example.transportation.transportation.services.EvtolService;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/evtol")
@@ -21,32 +27,37 @@ public class EvtolController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Object> registerEvtol(@RequestBody Evtol evtol) {
-        return evtolService.registerEvtol(evtol);
+    public ResponseEntity<EvtolDTO> registerEvtol(@RequestBody Evtol evtol) {
+        EvtolDTO evtolDTO = evtolService.registerEvtol(evtol);
+        return new ResponseEntity<>(evtolDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("")
-    public ResponseEntity<Object> getAvailableEvtols() {
-        return evtolService.getAllAvailableVtols();
+    public ResponseEntity<List<EvtolDTO>> getAvailableEvtols() {
+        List<EvtolDTO> availableEvtols = evtolService.getAllAvailableVtols();
+        return new ResponseEntity<>(availableEvtols, HttpStatus.OK);
     }
 
     @GetMapping("/{serialNumber}/battery")
-    public ResponseEntity<Object> getEvtolBatteryInformation(@PathVariable String serialNumber) {
-        return evtolService.getEvtolBatteryInformation(serialNumber);
+    public ResponseEntity<BatteryDTO> getEvtolBatteryInformation(@PathVariable String serialNumber) {
+        BatteryDTO batteryDTO = evtolService.getBatteryInformation(serialNumber);
+        return new ResponseEntity<>(batteryDTO, HttpStatus.OK);
     }
 
     @GetMapping("/{serialNumber}/medications")
-    public ResponseEntity<Object> getEvtolLoadedMedications(@PathVariable String serialNumber) {
-        return evtolService.getEvtolLoadedMedications(serialNumber);
+    public ResponseEntity<List<MedicationDTO>> getEvtolLoadedMedications(@PathVariable String serialNumber) {
+        List<MedicationDTO> loadedMedications = evtolService.getLoadedMedications(serialNumber);
+        return new ResponseEntity<>(loadedMedications, HttpStatus.OK);
     }
 
     @PostMapping(value = "/{serialNumber}/load", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Object> loadEvtolWithMedication(
+    public ResponseEntity<MedicationDTO> loadEvtolWithMedication(
             @PathVariable String serialNumber,
             @RequestPart Medication medication,
             @RequestPart MultipartFile multipartFile
     ) throws IOException {
-        return evtolService.loadEvtolMedications(serialNumber, medication, multipartFile);
+        MedicationDTO medicationDTO = evtolService.loadEvtolMedications(serialNumber, medication, multipartFile);
+        return new ResponseEntity<>(medicationDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/images/{imageName}")

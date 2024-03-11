@@ -1,5 +1,8 @@
 package com.example.transportation.transportation.services.impl;
 
+import com.example.transportation.transportation.dto.BatteryDTO;
+import com.example.transportation.transportation.dto.EvtolDTO;
+import com.example.transportation.transportation.dto.MedicationDTO;
 import com.example.transportation.transportation.enums.EvtolState;
 import com.example.transportation.transportation.exception.EvtolBadRequestException;
 import com.example.transportation.transportation.exception.EvtolDuplicateException;
@@ -10,6 +13,8 @@ import com.example.transportation.transportation.repositories.EvtolRepository;
 import com.example.transportation.transportation.repositories.MedicationRepository;
 import com.example.transportation.transportation.response.ResponseHandler;
 import com.example.transportation.transportation.services.EvtolService;
+import jakarta.validation.constraints.Null;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,74 +33,77 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "*")
 @Service
 public class EvtolServiceImpl implements EvtolService {
 
-    EvtolRepository evtolRepository;
-    MedicationRepository medicationRepository;
+    private final EvtolRepository evtolRepository;
+    private final MedicationRepository medicationRepository;
+    private final ModelMapper modelMapper;
 
     public EvtolServiceImpl(EvtolRepository evtolrepository,
-                            MedicationRepository medicationRepository) {
+                            MedicationRepository medicationRepository,
+                            ModelMapper modelMapper) {
         this.evtolRepository = evtolrepository;
         this.medicationRepository = medicationRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public ResponseEntity<Object> registerEvtol(Evtol evtol) {
-        if (evtolRepository.findById(evtol.getSerialNumber()).isPresent()) {
+    public EvtolDTO registerEvtol(Evtol evtol) {
+        if (evtolRepository.findEvtolBySerialNumber(evtol.getSerialNumber()) != null) {
             throw new EvtolDuplicateException("Serial number already exists");
         }
 
-        evtolRepository.save(evtol);
-
-        return ResponseHandler.responseBuilder("evtol registered successfully", HttpStatus.OK, evtol);
+        Evtol evtolResponse = evtolRepository.save(evtol);
+        return modelMapper.map(evtolResponse, EvtolDTO.class);
     }
 
     @Override
-    public ResponseEntity<Object> getEvtolBatteryInformation(String serialNumber) {
-        Evtol evtol = evtolRepository.findById(serialNumber)
-                .orElseThrow(() -> new EvtolNotFoundException("The specified evtol could not be found"));
+    public BatteryDTO getBatteryInformation(String serialNumber) {
+        Evtol evtol = evtolRepository.findEvtolBySerialNumber(serialNumber);
+        if (evtol == null) {
+            throw new EvtolNotFoundException("Requested Evtol could not be found");
+        }
 
-        return ResponseHandler.responseBuilder("success", HttpStatus.OK, evtol.getPercentage());
+        return modelMapper.map(evtol, BatteryDTO.class);
     }
 
     @Override
-    public ResponseEntity<Object> getEvtolLoadedMedications(String serialNumber) {
-        Evtol evtol = evtolRepository.findById(serialNumber)
-                .orElseThrow(() -> new EvtolNotFoundException("The specified evtol could not be found"));
+    public List<MedicationDTO> getLoadedMedications(String serialNumber) {
+        Evtol evtol = evtolRepository.findEvtolBySerialNumber(serialNumber);
+        if (evtol == null) {
+            throw new EvtolNotFoundException("Requested Evtol could not be found");
+        }
 
-        return ResponseHandler.responseBuilder("success", HttpStatus.OK, evtol.getMedications());
+        List<Medication> medications = evtol.getMedications();
+        return medications.stream()
+                .map(medication -> modelMapper.map(medication, MedicationDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public ResponseEntity<Object> loadEvtolMedications(String serialNumber,
+    public MedicationDTO loadEvtolMedications(String serialNumber,
                                                        Medication medication,
                                                        MultipartFile multipartFile
     ) throws IOException {
-        Evtol evtol = evtolRepository.findById(serialNumber)
-                .orElseThrow(() -> new EvtolNotFoundException("The specified evtol could not be found"));
-
-        if (medication.getWeight() > evtol.getWeightLimit()) {
-            throw new EvtolBadRequestException("The medication weight surpasses evtol weight limit");
+        Evtol evtol = evtolRepository.findEvtolBySerialNumber(serialNumber);
+        if (evtol == null) {
+            throw new EvtolNotFoundException("Requested Evtol could not be found");
         }
 
         String medicationImageName = multipartFile.getOriginalFilename();
-        int medicationImageBytesLength = multipartFile.getBytes().length;
 
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(medicationImageName));
-        if (fileName.contains("..")) {
-            throw new EvtolBadRequestException("Filename contains invalid path sequence");
-        }
+        // validations on multipart file
+        validatePathSequence(medicationImageName);
+        validateImageWeight(evtol, medication);
+        validateMedicalImageSize(multipartFile);
 
-        if (medicationImageBytesLength > (1024 * 1024)) {
-            throw new EvtolBadRequestException("File size exceeds maximum limit");
-        }
-
-        // upload file to local file system
-        String imagePath = "src/main/resources/images/" + medicationImageName;
-
+        // copy file to image path
+        String uniquePath = medication.getCode() + "-" + medicationImageName;
+        String imagePath = "src/main/resources/images/" + uniquePath;
         try (InputStream inputStream = multipartFile.getInputStream()) {
             Files.copy(inputStream, Paths.get(imagePath));
         } catch (IOException e) {
@@ -104,28 +112,30 @@ public class EvtolServiceImpl implements EvtolService {
 
         String imageURl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("api/v1/evtol/images/")
-                .path(medicationImageName)
+                .path(uniquePath)
                 .toUriString();
 
         medication.setEvtol(evtol);
         medication.setMedicalImageUrl(imageURl);
-        medicationRepository.save(medication);
+        Medication medicationResponse = medicationRepository.save(medication);
 
         evtol.addMedication(medication);
         evtolRepository.save(evtol);
 
-        return ResponseHandler.responseBuilder("medications loaded successfully", HttpStatus.OK, medication);
+        return modelMapper.map(medicationResponse, MedicationDTO.class);
     }
 
     @Override
-    public ResponseEntity<Object> getAllAvailableVtols() {
+    public List<EvtolDTO> getAllAvailableVtols() {
         List<Evtol> availableEvtols = evtolRepository.findAvailableEvtols();
 
         if (availableEvtols.isEmpty()) {
             throw new EvtolNotFoundException("No available evtols where found");
         }
 
-        return ResponseHandler.responseBuilder("success", HttpStatus.OK, availableEvtols);
+        return availableEvtols.stream()
+                .map(evtol -> modelMapper.map(evtol, EvtolDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -154,6 +164,26 @@ public class EvtolServiceImpl implements EvtolService {
             }
 
             evtolRepository.save(evtol);
+        }
+    }
+
+    public void validateMedicalImageSize(MultipartFile multipartFile) throws IOException {
+        int medicationImageBytesLength = multipartFile.getBytes().length;
+        if (medicationImageBytesLength > (1024 * 1024)) {
+            throw new EvtolBadRequestException("File size exceeds maximum limit");
+        }
+    }
+
+    public void validatePathSequence(String medicationImageName) {
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(medicationImageName));
+        if (fileName.contains("..")) {
+            throw new EvtolBadRequestException("Filename contains invalid path sequence");
+        }
+    }
+
+    public void validateImageWeight(Evtol evtol, Medication medication) {
+        if (medication.getWeight() > evtol.getWeightLimit()) {
+            throw new EvtolBadRequestException("The medication weight surpasses evtol weight limit");
         }
     }
 }

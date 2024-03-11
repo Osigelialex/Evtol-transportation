@@ -7,8 +7,4 @@ public class EvtolBadRequestException extends RuntimeException {
     public EvtolBadRequestException(String message) {
         super(message);
     }
-
-    public EvtolBadRequestException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

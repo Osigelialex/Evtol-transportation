@@ -19,27 +19,25 @@ public class EvtolConfig {
 
         return args -> {
 
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Lightweight, 100)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Lightweight, 100)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Lightweight, 100)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Lightweight, 100)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Middleweight, 200)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Middleweight, 200)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Middleweight, 200)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Middleweight, 200)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Middleweight, 200)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Cruiserweight, 400)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Cruiserweight, 400)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Cruiserweight, 400)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Cruiserweight, 400)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Cruiserweight, 400)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Heavyweight, 500)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Heavyweight, 500)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Heavyweight, 500)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Heavyweight, 500)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Heavyweight, 500)));
-            log.info("Preloading " + repository.save(new Evtol(EvtolModel.Heavyweight, 500)));
-
+            log.info("Preloading " + repository.save(new Evtol("78410808109", EvtolModel.Lightweight, 100)));
+            log.info("Preloading " + repository.save(new Evtol("78410808129", EvtolModel.Lightweight, 100)));
+            log.info("Preloading " + repository.save(new Evtol("55566677788", EvtolModel.Heavyweight, 150)));
+            log.info("Preloading " + repository.save(new Evtol("12345678901", EvtolModel.Lightweight, 80)));
+            log.info("Preloading " + repository.save(new Evtol("45678901234", EvtolModel.Middleweight, 110)));
+            log.info("Preloading " + repository.save(new Evtol("98765431109", EvtolModel.Heavyweight, 170)));
+            log.info("Preloading " + repository.save(new Evtol("11223346556", EvtolModel.Lightweight, 95)));
+            log.info("Preloading " + repository.save(new Evtol("78901239567", EvtolModel.Middleweight, 130)));
+            log.info("Preloading " + repository.save(new Evtol("34567899123", EvtolModel.Heavyweight, 180)));
+            log.info("Preloading " + repository.save(new Evtol("98765437190", EvtolModel.Lightweight, 85)));
+            log.info("Preloading " + repository.save(new Evtol("56789013345", EvtolModel.Middleweight, 140)));
+            log.info("Preloading " + repository.save(new Evtol("65432105876", EvtolModel.Heavyweight, 190)));
+            log.info("Preloading " + repository.save(new Evtol("78901236501", EvtolModel.Lightweight, 75)));
+            log.info("Preloading " + repository.save(new Evtol("23456786012", EvtolModel.Middleweight, 160)));
+            log.info("Preloading " + repository.save(new Evtol("78901237590", EvtolModel.Heavyweight, 200)));
+            log.info("Preloading " + repository.save(new Evtol("34567899109", EvtolModel.Lightweight, 90)));
+            log.info("Preloading " + repository.save(new Evtol("45678902209", EvtolModel.Middleweight, 125)));
+            log.info("Preloading " + repository.save(new Evtol("789012341567", EvtolModel.Heavyweight, 175)));
+            log.info("Preloading " + repository.save(new Evtol("12345678909", EvtolModel.Lightweight, 88)));
         };
     }
 }

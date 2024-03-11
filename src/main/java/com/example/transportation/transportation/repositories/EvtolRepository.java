@@ -10,4 +10,6 @@ public interface EvtolRepository extends JpaRepository<Evtol, String> {
 
     @Query("select e from Evtol e where e.percentage > 25")
     List<Evtol> findAvailableEvtols();
+
+    Evtol findEvtolBySerialNumber(String serialNumber);
 }

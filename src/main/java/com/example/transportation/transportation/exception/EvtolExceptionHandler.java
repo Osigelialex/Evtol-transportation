@@ -11,7 +11,6 @@ public class EvtolExceptionHandler {
     public ResponseEntity<Object> handleEvtolNotFoundException(EvtolNotFoundException evtolNotFoundException) {
         EvtolException evtolException = new EvtolException(
                 evtolNotFoundException.getMessage(),
-                evtolNotFoundException.getCause(),
                 HttpStatus.NOT_FOUND
         );
 
@@ -22,7 +21,6 @@ public class EvtolExceptionHandler {
     public ResponseEntity<Object> handleEvtolDuplicateException(EvtolDuplicateException evtolDuplicateException) {
         EvtolException evtolException = new EvtolException(
                 evtolDuplicateException.getMessage(),
-                evtolDuplicateException.getCause(),
                 HttpStatus.CONFLICT
         );
 
@@ -33,7 +31,6 @@ public class EvtolExceptionHandler {
     public ResponseEntity<Object> handleEvtolBadRequestException(EvtolBadRequestException evtolBadRequestException) {
         EvtolException evtolException = new EvtolException(
                 evtolBadRequestException.getMessage(),
-                evtolBadRequestException.getCause(),
                 HttpStatus.BAD_REQUEST
         );
 
