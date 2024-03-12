@@ -8,8 +8,11 @@ import java.util.List;
 
 public interface EvtolRepository extends JpaRepository<Evtol, String> {
 
-    @Query("select e from Evtol e where e.percentage > 25")
+    @Query("SELECT e FROM Evtol e WHERE e.percentage > 25")
     List<Evtol> findAvailableEvtols();
 
     Evtol findEvtolBySerialNumber(String serialNumber);
+
+    @Query("SELECT e from Evtol e WHERE e.medications IS NOT EMPTY")
+    List<Evtol> findLoadedEvtols();
 }

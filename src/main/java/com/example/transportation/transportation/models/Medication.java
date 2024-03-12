@@ -11,10 +11,10 @@ import lombok.*;
 public class Medication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long medicationId;
 
     @ManyToOne
-    @JoinColumn(name = "evtolSerialNumber")
+    @JoinColumn(name = "id")
     private Evtol evtol;
 
     @Pattern(regexp = "^[a-zA-Z0-9_-]*$")
