@@ -11,9 +11,7 @@ import com.example.transportation.transportation.models.Evtol;
 import com.example.transportation.transportation.models.Medication;
 import com.example.transportation.transportation.repositories.EvtolRepository;
 import com.example.transportation.transportation.repositories.MedicationRepository;
-import com.example.transportation.transportation.response.ResponseHandler;
 import com.example.transportation.transportation.services.EvtolService;
-import jakarta.validation.constraints.Null;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,14 +36,15 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @Service
 public class EvtolServiceImpl implements EvtolService {
-
     private final EvtolRepository evtolRepository;
     private final MedicationRepository medicationRepository;
     private final ModelMapper modelMapper;
 
-    public EvtolServiceImpl(EvtolRepository evtolrepository,
-                            MedicationRepository medicationRepository,
-                            ModelMapper modelMapper) {
+    public EvtolServiceImpl(
+            EvtolRepository evtolrepository,
+            MedicationRepository medicationRepository,
+            ModelMapper modelMapper
+    ) {
         this.evtolRepository = evtolrepository;
         this.medicationRepository = medicationRepository;
         this.modelMapper = modelMapper;
@@ -96,24 +95,15 @@ public class EvtolServiceImpl implements EvtolService {
 
         String medicationImageName = multipartFile.getOriginalFilename();
 
-        // validations on multipart file
         validatePathSequence(medicationImageName);
-        validateImageWeight(evtol, medication);
+
+        validateWeight(evtol, medication);
+
         validateMedicalImageSize(multipartFile);
 
-        // copy file to image path
-        String uniquePath = medication.getCode() + "-" + medicationImageName;
-        String imagePath = "src/main/resources/images/" + uniquePath;
-        try (InputStream inputStream = multipartFile.getInputStream()) {
-            Files.copy(inputStream, Paths.get(imagePath));
-        } catch (IOException e) {
-            throw e;
-        }
+        uploadImageToFileSystem(multipartFile);
 
-        String imageURl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("api/v1/evtol/images/")
-                .path(uniquePath)
-                .toUriString();
+        String imageURl = constructImageUrl(medicationImageName);
 
         medication.setEvtol(evtol);
         medication.setMedicalImageUrl(imageURl);
@@ -181,9 +171,24 @@ public class EvtolServiceImpl implements EvtolService {
         }
     }
 
-    public void validateImageWeight(Evtol evtol, Medication medication) {
+    public void validateWeight(Evtol evtol, Medication medication) {
         if (medication.getWeight() > evtol.getWeightLimit()) {
             throw new EvtolBadRequestException("The medication weight surpasses evtol weight limit");
         }
+    }
+
+    public void uploadImageToFileSystem(MultipartFile multipartFile) throws IOException {
+        String medicationImageName = multipartFile.getOriginalFilename();
+        String imagePath = "src/main/resources/images/" + medicationImageName;
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            Files.copy(inputStream, Paths.get(imagePath));
+        }
+    }
+
+    public String constructImageUrl(String imageName) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("api/v1/evtol/images")
+                .path(imageName)
+                .toUriString();
     }
 }
