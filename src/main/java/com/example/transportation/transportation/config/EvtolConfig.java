@@ -31,13 +31,6 @@ public class EvtolConfig {
             log.info("Preloading " + repository.save(new Evtol("98765437190", EvtolModel.Lightweight, 85)));
             log.info("Preloading " + repository.save(new Evtol("56789013345", EvtolModel.Middleweight, 140)));
             log.info("Preloading " + repository.save(new Evtol("65432105876", EvtolModel.Heavyweight, 190)));
-            log.info("Preloading " + repository.save(new Evtol("78901236501", EvtolModel.Lightweight, 75)));
-            log.info("Preloading " + repository.save(new Evtol("23456786012", EvtolModel.Middleweight, 160)));
-            log.info("Preloading " + repository.save(new Evtol("78901237590", EvtolModel.Heavyweight, 200)));
-            log.info("Preloading " + repository.save(new Evtol("34567899109", EvtolModel.Lightweight, 90)));
-            log.info("Preloading " + repository.save(new Evtol("45678902209", EvtolModel.Middleweight, 125)));
-            log.info("Preloading " + repository.save(new Evtol("789012341567", EvtolModel.Heavyweight, 175)));
-            log.info("Preloading " + repository.save(new Evtol("12345678909", EvtolModel.Lightweight, 88)));
         };
     }
 }

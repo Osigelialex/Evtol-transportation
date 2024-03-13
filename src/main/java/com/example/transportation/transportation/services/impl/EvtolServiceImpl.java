@@ -13,6 +13,7 @@ import com.example.transportation.transportation.repositories.EvtolRepository;
 import com.example.transportation.transportation.repositories.MedicationRepository;
 import com.example.transportation.transportation.services.EvtolService;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -33,22 +33,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*")
-@Service
-public class EvtolServiceImpl implements EvtolService {
-    private final EvtolRepository evtolRepository;
-    private final MedicationRepository medicationRepository;
-    private final ModelMapper modelMapper;
 
-    public EvtolServiceImpl(
-            EvtolRepository evtolrepository,
-            MedicationRepository medicationRepository,
-            ModelMapper modelMapper
-    ) {
-        this.evtolRepository = evtolrepository;
-        this.medicationRepository = medicationRepository;
-        this.modelMapper = modelMapper;
-    }
+@Service
+final class EvtolServiceImpl implements EvtolService {
+    @Autowired
+    EvtolRepository evtolRepository;
+    @Autowired
+    MedicationRepository medicationRepository;
+    @Autowired
+    ModelMapper modelMapper;
 
     @Override
     public EvtolDTO registerEvtol(Evtol evtol) {
