@@ -14,4 +14,5 @@ public class DashboardDTO {
     Integer loadedEvtols;
     Integer availableEvtolsCount;
     Integer totalEvtols;
+    Integer totalDeliveries;
 }

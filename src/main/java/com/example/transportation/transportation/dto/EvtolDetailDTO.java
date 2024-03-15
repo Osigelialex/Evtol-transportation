@@ -5,14 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EvtolDTO {
+public class EvtolDetailDTO {
     private String serialNumber;
     private String model;
     private Double weightLimit;
     private Integer percentage;
     private EvtolState state;
-    private String registeredAt;
+    private List<MedicationDTO> medications;
 }

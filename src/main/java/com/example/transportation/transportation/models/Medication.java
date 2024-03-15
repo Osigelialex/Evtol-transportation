@@ -24,6 +24,4 @@ public class Medication {
 
     @Pattern(regexp = "^[A-Z0-9_]*$")
     private String code;
-
-    private String medicalImageUrl;
 }

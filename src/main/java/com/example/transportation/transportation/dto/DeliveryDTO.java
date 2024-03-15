@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MedicationDTO {
-    private String name;
-    private String weight;
-    private String code;
+public class DeliveryDTO {
+    private String recipientName;
+    private String address;
+    private String evtolSerialNumber;
 }

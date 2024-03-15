@@ -2,6 +2,7 @@ package com.example.transportation.transportation.services.impl;
 
 import com.example.transportation.transportation.dto.BatteryDTO;
 import com.example.transportation.transportation.dto.EvtolDTO;
+import com.example.transportation.transportation.dto.EvtolDetailDTO;
 import com.example.transportation.transportation.dto.MedicationDTO;
 import com.example.transportation.transportation.enums.EvtolState;
 import com.example.transportation.transportation.exception.EvtolBadRequestException;
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
@@ -38,8 +40,6 @@ import java.util.stream.Collectors;
 final class EvtolServiceImpl implements EvtolService {
     @Autowired
     EvtolRepository evtolRepository;
-    @Autowired
-    MedicationRepository medicationRepository;
     @Autowired
     ModelMapper modelMapper;
 
@@ -54,13 +54,19 @@ final class EvtolServiceImpl implements EvtolService {
     }
 
     @Override
-    public BatteryDTO getBatteryInformation(String serialNumber) {
+    public EvtolDetailDTO getEvtolDetail(String serialNumber) {
         Evtol evtol = evtolRepository.findEvtolBySerialNumber(serialNumber);
         if (evtol == null) {
             throw new EvtolNotFoundException("Requested Evtol could not be found");
         }
 
-        return modelMapper.map(evtol, BatteryDTO.class);
+        return  modelMapper.map(evtol, EvtolDetailDTO.class);
+    }
+
+    @Override
+    public List<EvtolDTO> getLoadedEvtols() {
+        List<Evtol> evtols = evtolRepository.findLoadedEvtols();
+        return evtols.stream().map(evtol -> modelMapper.map(evtol, EvtolDTO.class)).toList();
     }
 
     @Override
@@ -77,35 +83,15 @@ final class EvtolServiceImpl implements EvtolService {
     }
 
     @Override
-    public MedicationDTO loadEvtolMedications(String serialNumber,
-                                                       Medication medication,
-                                                       MultipartFile multipartFile
-    ) throws IOException {
-        Evtol evtol = evtolRepository.findEvtolBySerialNumber(serialNumber);
-        if (evtol == null) {
-            throw new EvtolNotFoundException("Requested Evtol could not be found");
+    public List<EvtolDTO> getAllEvtols() {
+        List<Evtol> evtols = evtolRepository.findAllByOrderByRegisteredAtDesc();
+        if (evtols.isEmpty()) {
+            throw new EvtolNotFoundException("No evtols where found");
         }
 
-        String medicationImageName = multipartFile.getOriginalFilename();
-
-        validatePathSequence(medicationImageName);
-
-        validateWeight(evtol, medication);
-
-        validateMedicalImageSize(multipartFile);
-
-        uploadImageToFileSystem(multipartFile);
-
-        String imageURl = constructImageUrl(medicationImageName);
-
-        medication.setEvtol(evtol);
-        medication.setMedicalImageUrl(imageURl);
-        Medication medicationResponse = medicationRepository.save(medication);
-
-        evtol.addMedication(medication);
-        evtolRepository.save(evtol);
-
-        return modelMapper.map(medicationResponse, MedicationDTO.class);
+        return evtols.stream()
+                .map(evtol -> modelMapper.map(evtol, EvtolDTO.class))
+                .toList();
     }
 
     @Override
@@ -123,7 +109,7 @@ final class EvtolServiceImpl implements EvtolService {
 
     @Override
     public ResponseEntity<byte[]> getMedicationImage(String imageName) throws IOException {
-        Path imagePath = Paths.get("src/main/resources/images", imageName);
+        Path imagePath = Paths.get("src/main/resources/images/", imageName);
         byte[] imageContent = Files.readAllBytes(imagePath);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
@@ -134,54 +120,25 @@ final class EvtolServiceImpl implements EvtolService {
     @Scheduled(fixedRate = 100_000L)
     public void updateBatteryPercentage() {
         List<Evtol> evtols = evtolRepository.findAll();
+        Random random = new Random();
+        int MAX = 5;
+        int MIN = 1;
 
         for (Evtol evtol : evtols) {
-            evtol.setPercentage(Math.max(evtol.getPercentage() - 1, 0));
+            evtol.setPercentage(Math.max(evtol.getPercentage() - random.nextInt(MAX - MIN + 1), 0));
 
-            if (evtol.getPercentage() < 25 && evtol.getState().equals(EvtolState.LOADING)) {
+            if (evtol.getPercentage() > 25) {
+                evtol.setState(EvtolState.LOADING);
+            } else {
                 evtol.setState(EvtolState.IDLE);
             }
 
             if (evtol.getPercentage() == 0) {
                 evtol.setPercentage(100);
+                evtol.setState(EvtolState.LOADING);
             }
 
             evtolRepository.save(evtol);
         }
-    }
-
-    public void validateMedicalImageSize(MultipartFile multipartFile) throws IOException {
-        int medicationImageBytesLength = multipartFile.getBytes().length;
-        if (medicationImageBytesLength > (1024 * 1024)) {
-            throw new EvtolBadRequestException("File size exceeds maximum limit");
-        }
-    }
-
-    public void validatePathSequence(String medicationImageName) {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(medicationImageName));
-        if (fileName.contains("..")) {
-            throw new EvtolBadRequestException("Filename contains invalid path sequence");
-        }
-    }
-
-    public void validateWeight(Evtol evtol, Medication medication) {
-        if (medication.getWeight() > evtol.getWeightLimit()) {
-            throw new EvtolBadRequestException("The medication weight surpasses evtol weight limit");
-        }
-    }
-
-    public void uploadImageToFileSystem(MultipartFile multipartFile) throws IOException {
-        String medicationImageName = multipartFile.getOriginalFilename();
-        String imagePath = "src/main/resources/images/" + medicationImageName;
-        try (InputStream inputStream = multipartFile.getInputStream()) {
-            Files.copy(inputStream, Paths.get(imagePath));
-        }
-    }
-
-    public String constructImageUrl(String imageName) {
-        return ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("api/v1/evtol/images")
-                .path(imageName)
-                .toUriString();
     }
 }

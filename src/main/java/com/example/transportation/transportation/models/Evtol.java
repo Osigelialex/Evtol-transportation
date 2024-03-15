@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Entity
 @Data
@@ -33,15 +35,21 @@ public class Evtol {
 
     @Min(0)
     @Max(100)
-    private Integer percentage = 100;
+    private Integer percentage = new Random().nextInt(100 - 70) + 70;
 
     @Enumerated(EnumType.STRING)
-    private EvtolState state = EvtolState.IDLE;
+    private EvtolState state = EvtolState.LOADING;
 
     @OneToMany(mappedBy = "evtol", cascade = CascadeType.ALL)
     private List<Medication> medications;
 
+    private LocalDateTime registeredAt = LocalDateTime.now();
+
     public void addMedication(Medication medication) {
         medications.add(medication);
+    }
+
+    public void removeAllMedications() {
+        medications.clear();
     }
 }
