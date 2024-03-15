@@ -108,15 +108,6 @@ final class EvtolServiceImpl implements EvtolService {
     }
 
     @Override
-    public ResponseEntity<byte[]> getMedicationImage(String imageName) throws IOException {
-        Path imagePath = Paths.get("src/main/resources/images/", imageName);
-        byte[] imageContent = Files.readAllBytes(imagePath);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-        return new ResponseEntity<>(imageContent, headers, HttpStatus.OK);
-    }
-
-    @Override
     @Scheduled(fixedRate = 100_000L)
     public void updateBatteryPercentage() {
         List<Evtol> evtols = evtolRepository.findAll();
@@ -129,7 +120,8 @@ final class EvtolServiceImpl implements EvtolService {
 
             if (evtol.getPercentage() > 25) {
                 evtol.setState(EvtolState.LOADING);
-            } else {
+            }
+            if (evtol.getPercentage() < 25) {
                 evtol.setState(EvtolState.IDLE);
             }
 

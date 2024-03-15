@@ -19,6 +19,5 @@ public interface EvtolService {
     public List<MedicationDTO> getLoadedMedications(String serialNumber);
     public List<EvtolDTO> getAllEvtols();
     public List<EvtolDTO> getAllAvailableVtols();
-    public ResponseEntity<byte[]> getMedicationImage(String imageName) throws IOException;
     public void updateBatteryPercentage();
 }

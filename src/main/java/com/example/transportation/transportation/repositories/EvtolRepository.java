@@ -1,5 +1,6 @@
 package com.example.transportation.transportation.repositories;
 
+import com.example.transportation.transportation.enums.EvtolState;
 import com.example.transportation.transportation.models.Evtol;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,5 @@ public interface EvtolRepository extends JpaRepository<Evtol, String> {
 
     @Query("SELECT e from Evtol e WHERE e.state = LOADED")
     List<Evtol> findLoadedEvtols();
+
 }

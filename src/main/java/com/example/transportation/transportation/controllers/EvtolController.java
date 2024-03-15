@@ -61,10 +61,4 @@ public class EvtolController {
         List<MedicationDTO> loadedMedications = evtolService.getLoadedMedications(serialNumber);
         return new ResponseEntity<>(loadedMedications, HttpStatus.OK);
     }
-
-    @GetMapping("/evtol/images/{imageName}")
-    @ResponseBody
-    public ResponseEntity<byte[]> getMedicationImage(@PathVariable String imageName) throws IOException {
-        return evtolService.getMedicationImage(imageName);
-    }
 }

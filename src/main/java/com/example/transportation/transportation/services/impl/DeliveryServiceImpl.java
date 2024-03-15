@@ -6,7 +6,6 @@ import com.example.transportation.transportation.exception.EvtolBadRequestExcept
 import com.example.transportation.transportation.exception.EvtolNotFoundException;
 import com.example.transportation.transportation.models.Delivery;
 import com.example.transportation.transportation.models.Evtol;
-import com.example.transportation.transportation.models.Medication;
 import com.example.transportation.transportation.repositories.DeliveryRepository;
 import com.example.transportation.transportation.repositories.EvtolRepository;
 import com.example.transportation.transportation.services.DeliveryService;
@@ -14,7 +13,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
