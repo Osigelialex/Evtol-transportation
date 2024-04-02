@@ -1,5 +1,8 @@
 ## Project Overview: Modern Transportation System for Medication Delivery with eVTOL Vehicles
 
+![image](https://github.com/Osigelialex/evtol-transportation/assets/97721950/7e510983-ed0b-4761-963c-93617d22c603)
+
+
 ### Description
 This project implements a backend API for a cutting-edge transportation system utilizing electric Vertical Takeoff and Landing (eVTOL) vehicles for medication delivery. It manages a fleet of eVTOLs and tracks medications, providing RESTful API endpoints for registering new eVTOLs, loading medications onto them (including weight and battery level checks), checking loaded medications for specific eVTOLs, finding available eVTOLs for loading, and obtaining the battery level of a specific eVTOL. Additionally, it implements a scheduled task to monitor and update evTOL battery levels.
 
